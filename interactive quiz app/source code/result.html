@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result - Quiz App</title>
+<style>
+body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #f8cdda, #1d2b64); margin:0; height:100vh; display:flex; justify-content:center; align-items:center; overflow:hidden; }
+.result-container { background: rgba(255,255,255,0.95); padding:40px; border-radius:20px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.2); width:90%; max-width:500px; }
+.result-container h2 { font-size:2.5rem; margin-bottom:20px; animation: bounce 1s infinite alternate; }
+.result-container p { font-size:1.5rem; margin-bottom:20px; }
+.btn { text-decoration:none; color:white; background:linear-gradient(45deg,#6a11cb,#2575fc); padding:15px 30px; margin:10px; display:inline-block; border-radius:50px; font-weight:bold; transition:transform 0.3s, box-shadow 0.3s; }
+.btn:hover { transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.3); }
+#emojiReaction { font-size:4rem; margin-top:20px; animation:rotateEmoji 2s infinite linear; }
+@keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-15px); } }
+@keyframes rotateEmoji { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.floating-emojis { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:50; overflow:hidden; }
+.emoji { position:absolute; font-size:2rem; animation:float linear infinite; will-change:transform; }
+@keyframes float { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-120vh) rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="floating-emojis" id="floatingEmojis"></div>
+<div class="result-container">
+    <h2>🎉 Quiz Completed! 🎊</h2>
+    <p>Your Score: <strong id="finalScore"></strong></p>
+    <div id="emojiReaction">🤩</div>
+    <a href="index.html" class="btn">🏠 Home</a>
+    <a href="leaderboard.html" class="btn">🏆 Leaderboard</a>
+    <a href="quiz.html" class="btn">🔁 Retake</a>
+</div>
+
+<script>
+const score = parseInt(localStorage.getItem('quizScore')) || 0;
+document.getElementById('finalScore').textContent = score;
+
+// Emoji reaction
+const emojiReaction = document.getElementById('emojiReaction');
+emojiReaction.textContent = score<5?'😅':score<8?'😊':score<10?'🤩':'🏆🎉';
+
+// Floating emojis
+const floatingEmojisContainer = document.getElementById('floatingEmojis');
+const emojis = ['🎉','✨','🌟','🥳','🎈','💫','🍀','🏆','🎊','😎','🤩'];
+for(let i=0;i<30;i++){
+    const e=document.createElement('div');
+    e.classList.add('emoji'); e.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    e.style.left=Math.random()*100+'vw';
+    e.style.fontSize=(Math.random()*30+20)+'px';
+    e.style.animationDuration=(Math.random()*5+5)+'s';
+    e.style.animationDelay=(Math.random()*5)+'s';
+    floatingEmojisContainer.appendChild(e);
+}
+
+// Save score to leaderboard
+let leaderboard = JSON.parse(localStorage.getItem('leaderboard'))||[];
+leaderboard.push({name:'Player',score});
+leaderboard.sort((a,b)=>b.score-a.score);
+localStorage.setItem('leaderboard',JSON.stringify(leaderboard));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz</title>
+<style>
+body { font-family: 'Arial', sans-serif; background: linear-gradient(to right, #f8cdda, #1d2b64); color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+.quiz-container { background: #fff; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); padding: 30px; width: 90%; max-width: 700px; perspective: 1000px; }
+h1 { text-align: center; margin-bottom: 20px; color: #222; }
+.question-card { background: linear-gradient(145deg, #ffecd2, #fcb69f); padding: 20px; margin-bottom: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: rotateY(0deg); transition: transform 0.5s ease, box-shadow 0.5s ease; }
+.question-card:hover { transform: rotateY(5deg); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+.question-text { font-size: 18px; font-weight: bold; }
+.option-btn { display: block; width: 100%; margin: 10px 0; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; background: linear-gradient(to right, #6a11cb, #2575fc); color: white; transition: background 0.3s ease; }
+.option-btn:hover { background: linear-gradient(to right, #2575fc, #6a11cb); }
+.feedback { margin-top: 10px; font-size: 18px; font-weight: bold; }
+.submit-btn { background: #28a745; color: white; padding: 15px; width: 100%; border-radius: 10px; border: none; cursor: pointer; font-size: 18px; margin-top: 20px; }
+#timer { font-weight: bold; margin-bottom: 10px; }
+#timerBar { width: 100%; height: 10px; background: #ddd; border-radius: 5px; margin-bottom: 20px; }
+#timerBarProgress { height: 10px; background: #28a745; width: 100%; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="quiz-container">
+    <h1 id="quizTitle">🧩 Quiz</h1>
+    <div id="timer">Time Left: <span id="time">300</span>s</div>
+    <div id="timerBar"><div id="timerBarProgress"></div></div>
+    <form id="quizForm"></form>
+    <button type="button" onclick="submitQuiz()" class="submit-btn">Submit Quiz</button>
+</div>
+
+<script>
+// Questions for each topic
+const questions = {
+    frontend: [
+        {q:"What does HTML stand for?", options:["Hyper Text Markup Language","Home Tool Markup Language","Hyperlinks and Text Markup Language"], answer:"Hyper Text Markup Language"},
+        {q:"Which HTML tag is used for the largest heading?", options:["&lt;h1&gt;","&lt;h6&gt;","&lt;head&gt;"], answer:"<h1>"},
+        {q:"What does CSS stand for?", options:["Cascading Style Sheets","Computer Style Sheets","Creative Style Sheets"], answer:"Cascading Style Sheets"},
+        {q:"Which property is used to change the text color in CSS?", options:["color","font-color","text-color"], answer:"color"},
+        {q:"Which HTML attribute is used to define inline styles?", options:["style","class","font"], answer:"style"},
+        {q:"In CSS, which symbol is used to select an ID?", options:["#",".","*"], answer:"#"},
+        {q:"Which HTML element is used to define important text?", options:["&lt;strong&gt;","&lt;important&gt;","&lt;b&gt;"], answer:"<strong>"},
+        {q:"Which HTML element is used for inserting a line break?", options:["&lt;br&gt;","&lt;break&gt;","&lt;lb&gt;"], answer:"<br>"},
+        {q:"What does JavaScript primarily manipulate?", options:["HTML and CSS","Database","Server"], answer:"HTML and CSS"},
+        {q:"Which method is used to select an element by ID in JavaScript?", options:["getElementById","querySelectorAll","getElementsByClassName"], answer:"getElementById"}
+    ],
+    backend: [
+        {q:"Which language is commonly used for backend development?", options:["Python","HTML","CSS"], answer:"Python"},
+        {q:"Which of these is a backend framework?", options:["Django","React","Bootstrap"], answer:"Django"},
+        {q:"Which database is relational?", options:["MySQL","MongoDB","Firebase"], answer:"MySQL"},
+        {q:"What does API stand for?", options:["Application Programming Interface","Applied Program Interaction","Application Process Input"], answer:"Application Programming Interface"},
+        {q:"Which HTTP method is used to retrieve data?", options:["GET","POST","DELETE"], answer:"GET"},
+        {q:"Which Node.js module is used to create a server?", options:["http","fs","path"], answer:"http"},
+        {q:"What is Express.js?", options:["Backend framework","Frontend library","Database"], answer:"Backend framework"},
+        {q:"Which port does a default HTTP server use?", options:["80","8080","3000"], answer:"80"},
+        {q:"Which command installs packages in Node.js?", options:["npm install","pip install","gem install"], answer:"npm install"},
+        {q:"Which language is used to write server-side scripts?", options:["JavaScript","HTML","CSS"], answer:"JavaScript"}
+    ],
+    database: [
+        {q:"Which SQL command is used to fetch data?", options:["SELECT","INSERT","DELETE"], answer:"SELECT"},
+        {q:"Which database is NoSQL?", options:["MongoDB","MySQL","PostgreSQL"], answer:"MongoDB"},
+        {q:"Which SQL command adds data?", options:["INSERT","UPDATE","DROP"], answer:"INSERT"},
+        {q:"Which SQL command modifies data?", options:["UPDATE","SELECT","DELETE"], answer:"UPDATE"},
+        {q:"Which SQL command removes data?", options:["DELETE","UPDATE","INSERT"], answer:"DELETE"},
+        {q:"Which command creates a database?", options:["CREATE DATABASE","DROP DATABASE","ALTER DATABASE"], answer:"CREATE DATABASE"},
+        {q:"Primary key must be?", options:["Unique","Duplicate","Optional"], answer:"Unique"},
+        {q:"Foreign key is used for?", options:["Referencing another table","Styling data","Validating user"], answer:"Referencing another table"},
+        {q:"Which database uses collections instead of tables?", options:["MongoDB","MySQL","Oracle"], answer:"MongoDB"},
+        {q:"Which statement is correct to create a table?", options:["CREATE TABLE tablename","MAKE TABLE tablename","NEW TABLE tablename"], answer:"CREATE TABLE tablename"}
+    ]
+};
+
+// Get topic from URL
+const urlParams = new URLSearchParams(window.location.search);
+const topic = urlParams.get('topic') || 'frontend';
+document.getElementById('quizTitle').textContent = "🧩 " + topic.charAt(0).toUpperCase() + topic.slice(1) + " Quiz";
+
+const quizForm = document.getElementById('quizForm');
+
+// Render questions dynamically
+questions[topic].forEach((q,i)=>{
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.innerHTML = `
+        <p class="question-text">${i+1}. ${q.q}</p>
+        <div class="options">
+            ${q.options.map(opt=>`<button type="button" class="option-btn" onclick="checkAnswer(this,'${q.answer}')">${opt}</button>`).join('')}
+        </div>
+        <div class="feedback"></div>
+    `;
+    quizForm.appendChild(card);
+});
+
+// Timer
+let timeLeft = 300;
+let timerEl = document.getElementById('time');
+let timerBarProgress = document.getElementById('timerBarProgress');
+let timer = setInterval(() => {
+    if(timeLeft <= 0){
+        clearInterval(timer);
+        submitQuiz();
+    } else {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+        timerBarProgress.style.width = (timeLeft/3) + "%";
+    }
+}, 1000);
+
+// Answer checking
+function checkAnswer(btn, correctAnswer){
+    const parent = btn.closest('.question-card');
+    const feedback = parent.querySelector('.feedback');
+    const options = parent.querySelectorAll('.option-btn');
+    options.forEach(o=>o.disabled = true);
+
+    if(btn.textContent === correctAnswer){
+        btn.style.backgroundColor = "#28a745";
+        feedback.innerHTML = "✅ Correct! 😄";
+    } else {
+        btn.style.backgroundColor = "#dc3545";
+        feedback.innerHTML = "❌ Wrong! 😢";
+        options.forEach(o=>{ if(o.textContent===correctAnswer) o.style.backgroundColor="#28a745"; });
+    }
+}
+
+// Submit quiz and go to result page
+function submitQuiz(){
+    let total = questions[topic].length;
+    let correctCount = 0;
+
+    document.querySelectorAll('.question-card').forEach(card => {
+        const feedback = card.querySelector('.feedback').textContent;
+        if(feedback.includes("Correct")) correctCount++;
+    });
+
+    // Save score to localStorage
+    localStorage.setItem('quizScore', correctCount);
+
+    // Redirect to result page
+    window.location.href = "result.html";
+}
+</script>
+</body>
+</html>
+

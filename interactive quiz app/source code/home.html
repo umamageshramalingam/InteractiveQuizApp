@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz App Dashboard</title>
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" type="image/png">
+<link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:linear-gradient(135deg,#4facfe,#00f2fe);color:#333;min-height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;}
+header{position:fixed;top:0;left:0;width:100%;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);padding:15px 40px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 10px rgba(0,0,0,0.1);z-index:10;}
+.logo-section{display:flex;align-items:center;gap:10px;}
+.logo-section img{width:38px;height:38px;border-radius:8px;box-shadow:0 0 10px #00f2fe;}
+.logo-section h2{color:white;font-size:1.5em;text-shadow:0 0 10px #ffffff;}
+nav a{text-decoration:none;color:white;margin:0 15px;background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:25px;transition:all 0.3s ease;font-weight:500;box-shadow:0 0 8px rgba(255,255,255,0.3);}
+nav a:hover{background:white;color:#0078ff;transform:scale(1.1);box-shadow:0 0 15px #ffffff,0 0 30px #0078ff;}
+.container{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 20px 60px;z-index:2;position:relative;}
+.container h3{font-size:2em;color:white;margin-bottom:30px;text-shadow:0 0 15px rgba(255,255,255,0.8);animation:glowText 3s ease-in-out infinite alternate;}
+.quiz-list{display:flex;gap:25px;flex-wrap:wrap;justify-content:center;}
+.quiz-card{background:rgba(255,255,255,0.95);width:260px;padding:25px;border-radius:20px;box-shadow:0 0 15px rgba(0,0,0,0.15);transition:all 0.4s ease;text-align:center;position:relative;overflow:hidden;animation:fadeInUp 1s ease forwards;}
+.quiz-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#4facfe,#00f2fe,#4facfe);z-index:-1;border-radius:20px;background-size:400%;filter:blur(5px);opacity:0;transition:opacity 0.4s ease;}
+.quiz-card:hover::before{opacity:1;animation:borderGlow 3s linear infinite;}
+.quiz-card:hover{transform:translateY(-10px);box-shadow:0 0 25px rgba(0,150,255,0.3);}
+.quiz-card h4{font-size:1.3em;color:#0078ff;margin-bottom:10px;text-shadow:0 0 5px rgba(0,120,255,0.5);}
+.quiz-card p{color:#555;margin-bottom:20px;}
+.btn{text-decoration:none;background:linear-gradient(90deg,#0078ff,#00b4ff);color:white;padding:10px 20px;border-radius:25px;transition:0.3s ease;box-shadow:0 0 10px #0078ff;}
+.btn:hover{background:linear-gradient(90deg,#00b4ff,#0078ff);transform:scale(1.1);box-shadow:0 0 20px #00b4ff,0 0 40px #0078ff;}
+footer{text-align:center;padding:15px;color:white;background:rgba(0,0,0,0.15);backdrop-filter:blur(5px);font-size:0.9em;z-index:2;position:relative;}
+@keyframes fadeInUp{0%{opacity:0;transform:translateY(20px);}100%{opacity:1;transform:translateY(0);}}
+@keyframes glowText{0%{text-shadow:0 0 5px #fff,0 0 10px #4facfe,0 0 20px #00f2fe;}100%{text-shadow:0 0 15px #fff,0 0 25px #00f2fe,0 0 40px #4facfe;}}
+@keyframes borderGlow{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<header>
+    <div class="logo-section">
+        <img src="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" alt="Quiz Logo">
+        <h2>Quiz App</h2>
+    </div>
+    <nav>
+        <a href="quiz.html">🧠 Take Quiz</a>
+        <a href="leaderboard.html">🏆 Leaderboard</a>
+        <a href="#" onclick="logoutUser()">🚪 Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h3>💫 Choose a Quiz to Begin!</h3>
+    <div class="quiz-list">
+        <div class="quiz-card">
+            <h4>💻 Frontend Development</h4>
+            <p>10 Questions | 5 Minutes</p>
+            <a href="quiz.html?topic=frontend" class="btn">Start Quiz</a>
+        </div>
+        <div class="quiz-card">
+            <h4>🖥️ Backend Development</h4>
+            <p>10 Questions | 5 Minutes</p>
+            <a href="quiz.html?topic=backend" class="btn">Start Quiz</a>
+        </div>
+        <div class="quiz-card">
+            <h4>🗄️ Database</h4>
+            <p>10 Questions | 5 Minutes</p>
+            <a href="quiz.html?topic=database" class="btn">Start Quiz</a>
+        </div>
+    </div>
+</div>
+
+<footer>© 2025 Interactive Quiz App | All rights reserved</footer>
+
+<script>
+// Simple logout function
+function logoutUser(){
+    localStorage.removeItem('currentUser');
+    alert("Logged out successfully 👋");
+    window.location.href = "login.html";
+}
+
+// Check if user is logged in
+window.onload = function(){
+    const user = localStorage.getItem('currentUser');
+    if(!user){
+        alert("Please login first 🔐");
+        window.location.href = "login.html";
+    }
+}
+
+// Particle Background
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+let particlesArray = [];
+
+class Particle{
+    constructor(){
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.speedY = Math.random() * 1 - 0.5;
+    }
+    update(){
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if(this.x>canvas.width)this.x=0;
+        if(this.x<0)this.x=canvas.width;
+        if(this.y>canvas.height)this.y=0;
+        if(this.y<0)this.y=canvas.height;
+    }
+    draw(){
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fill();
+    }
+}
+
+function init(){
+    particlesArray=[];
+    for(let i=0;i<100;i++){
+        particlesArray.push(new Particle());
+    }
+}
+function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particlesArray.forEach(p=>{p.update();p.draw();});
+    requestAnimationFrame(animate);
+}
+init();
+animate();
+
+window.addEventListener('resize',()=>{
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    init();
+});
+</script>
+</body>
+</html>
